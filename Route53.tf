@@ -1,26 +1,4 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 data "aws_availability_zones" "available" {}
-
-terraform {
-  backend "s3" {
-    bucket = "nar3kjan-project-terraform-remote-state"
-    key = "dev/route53/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-data "terraform_remote_state" "servers" {
-  backend = "s3"
-  config = {
-    bucket = "nar3kjan-project-terraform-remote-state"
-    key = "dev/servers/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
 
 
 data "aws_route53_zone" "my_zone" {
@@ -68,8 +46,8 @@ resource "aws_route53_record" "www_elb" {
   type    = "A"
 
   alias {
-    name                   = data.terraform_remote_state.servers.outputs.elb_dns_name
-    zone_id                = data.terraform_remote_state.servers.outputs.elb_zone_id
+    name                   = aws_lb.web.dns_name
+    zone_id                = aws_lb.web.zone_id
     evaluate_target_health = true
   }
 }
@@ -80,8 +58,8 @@ resource "aws_route53_record" "elb" {
   type    = "A"
 
   alias {
-    name                   = data.terraform_remote_state.servers.outputs.elb_dns_name
-    zone_id                = data.terraform_remote_state.servers.outputs.elb_zone_id
+    name                   = aws_lb.web.dns_name
+    zone_id                = aws_lb.web.zone_id
     evaluate_target_health = true
   }
 }

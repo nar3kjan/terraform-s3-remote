@@ -1,36 +1,4 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 data "aws_availability_zones" "available" {}
-
-terraform {
-  backend "s3" {
-    bucket = "nar3kjan-project-terraform-remote-state"
-    key = "dev/servers/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    bucket = "nar3kjan-project-terraform-remote-state"
-    key = "dev/network/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-data "terraform_remote_state" "route53" {
-  backend = "s3"
-  config = {
-    bucket = "nar3kjan-project-terraform-remote-state"
-    key = "dev/route53/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
 
 
 #==========================================================================================
@@ -56,7 +24,7 @@ data "aws_ami" "latest_amazon" {
 resource "aws_security_group" "my_webserver" {
   name        = "Web Server Security Group"
   description = "My First Security Group"
-  vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id = aws_vpc.main.id
   dynamic "ingress" {
     for_each = ["80", "443", "22"]
     content {
@@ -102,7 +70,7 @@ resource "aws_autoscaling_group" "web" {
   min_size = 2
   max_size = 2
   min_elb_capacity = 2
-  vpc_zone_identifier = [data.terraform_remote_state.vpc.outputs.aws_public_subnet1_id, data.terraform_remote_state.vpc.outputs.aws_public_subnet2_id]
+  vpc_zone_identifier = [aws_subnet.public_subnet[0].id, aws_subnet.public_subnet[1].id]
   health_check_type = "ELB"
   target_group_arns = [aws_lb_target_group.http.arn]
   #load_balancers = [aws_lb.web.name]
@@ -132,7 +100,7 @@ resource "aws_lb" "web" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.my_webserver.id]
-  subnets            = [data.terraform_remote_state.vpc.outputs.aws_public_subnet1_id, data.terraform_remote_state.vpc.outputs.aws_public_subnet2_id]
+  subnets            = [aws_subnet.public_subnet[0].id, aws_subnet.public_subnet[1].id]
 
   enable_deletion_protection = false
 
@@ -146,7 +114,7 @@ resource "aws_lb_target_group" "http" {
   name     = "web-server-http"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id   = aws_vpc.main.id
 }
 
 
@@ -165,7 +133,7 @@ resource "aws_lb_listener" "forward" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = data.terraform_remote_state.route53.outputs.certificate_id
+  certificate_arn   = aws_acm_certificate.cert.id
 
   default_action {
     type             = "forward"
