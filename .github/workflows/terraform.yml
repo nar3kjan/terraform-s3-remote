@@ -2,8 +2,9 @@ name: Repository Dispatch
 on:
   repository_dispatch:
     types: [my-event],
+
   push:
-    branches: [main]
+    branches: ["main"]
 
 
 jobs:
