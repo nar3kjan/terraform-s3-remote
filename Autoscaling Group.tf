@@ -25,7 +25,7 @@ data "aws_ami" "latest_packer_image" {
   most_recent = true
   filter {
     name = "name"
-    values = ["ubuntu-nginx"]
+    values = ["ubuntu-nginx*"]
   }
 }
 
