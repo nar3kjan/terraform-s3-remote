@@ -9,6 +9,7 @@
 }
 */
 
+/*
 data "aws_ami" "latest_amazon" {
   owners = ["137112412989"]
   most_recent = true
@@ -17,6 +18,17 @@ data "aws_ami" "latest_amazon" {
     values = ["amzn2-ami-kernel-5.10-hvm-*-x86_64-gp2"]
   }
 }
+*/
+
+data "aws_ami" "latest_packer_image" {
+  owners = ["558664324013"]
+  most_recent = true
+  filter {
+    name = "name"
+    values = ["ubuntu-nginx"]
+  }
+}
+
 
 resource "aws_security_group" "my_webserver" {
   name        = "Web Server Security Group"
@@ -48,10 +60,9 @@ tags = {
 resource "aws_launch_configuration" "Web" {
   #name = "WebServer-Highly-Available"
   name_prefix = "WebServer-Highly-Available-LC-"
-  image_id = data.aws_ami.latest_amazon.id
+  image_id = data.aws_ami.latest_packer_image.id
   instance_type = "t2.micro"
   security_groups = [aws_security_group.my_webserver.id]
-  user_data = file("user_data.sh")
   key_name = "narek-key.n.virginia"
   
   lifecycle {
