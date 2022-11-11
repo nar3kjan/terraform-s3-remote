@@ -1,6 +1,3 @@
-data "aws_availability_zones" "available" {}
-
-
 data "aws_route53_zone" "my_zone" {
   name         = "nar3kjan.link"
   private_zone = false

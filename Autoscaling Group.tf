@@ -1,6 +1,3 @@
-data "aws_availability_zones" "available" {}
-
-
 #==========================================================================================
 /*data "aws_ami" "latest_ubuntu" {
   owners = ["099720109477"]
