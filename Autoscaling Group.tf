@@ -71,7 +71,7 @@ resource "aws_launch_configuration" "Web" {
 }
 
 
-/*
+
 resource "aws_autoscaling_group" "web" {
   name = "ASG-${aws_launch_configuration.Web.name}"
   launch_configuration = aws_launch_configuration.Web.name
@@ -168,7 +168,7 @@ resource "aws_lb_listener" "redirect" {
   }
 }
 
-*/
+
 
 /*
 resource "aws_elb" "web" {
